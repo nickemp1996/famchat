@@ -64,9 +64,10 @@ type Chat struct {
 }
 
 type User struct {
-	ID        uuid.UUID
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	Name      string
-	MyRole    Role
+	ID           uuid.UUID
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
+	Name         string
+	MyRole       Role
+	PasswordHash string
 }

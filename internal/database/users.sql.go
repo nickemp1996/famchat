@@ -12,25 +12,32 @@ import (
 )
 
 const createUser = `-- name: CreateUser :one
-INSERT INTO users (id, created_at, updated_at, name, my_role)
+INSERT INTO users (id, created_at, updated_at, name, my_role, password_hash)
 VALUES (
     $1,
     NOW(),
     NOW(),
     $2,
-    $3
+    $3,
+    $4
 )
-RETURNING id, created_at, updated_at, name, my_role
+RETURNING id, created_at, updated_at, name, my_role, password_hash
 `
 
 type CreateUserParams struct {
-	ID     uuid.UUID
-	Name   string
-	MyRole Role
+	ID           uuid.UUID
+	Name         string
+	MyRole       Role
+	PasswordHash string
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
-	row := q.db.QueryRowContext(ctx, createUser, arg.ID, arg.Name, arg.MyRole)
+	row := q.db.QueryRowContext(ctx, createUser,
+		arg.ID,
+		arg.Name,
+		arg.MyRole,
+		arg.PasswordHash,
+	)
 	var i User
 	err := row.Scan(
 		&i.ID,
@@ -38,6 +45,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.UpdatedAt,
 		&i.Name,
 		&i.MyRole,
+		&i.PasswordHash,
 	)
 	return i, err
 }
@@ -52,7 +60,7 @@ func (q *Queries) DeleteUsers(ctx context.Context) error {
 }
 
 const getUser = `-- name: GetUser :one
-SELECT id, created_at, updated_at, name, my_role FROM users
+SELECT id, created_at, updated_at, name, my_role, password_hash FROM users
 WHERE name = $1 LIMIT 1
 `
 
@@ -65,12 +73,13 @@ func (q *Queries) GetUser(ctx context.Context, name string) (User, error) {
 		&i.UpdatedAt,
 		&i.Name,
 		&i.MyRole,
+		&i.PasswordHash,
 	)
 	return i, err
 }
 
 const getUsers = `-- name: GetUsers :many
-SELECT id, created_at, updated_at, name, my_role FROM users
+SELECT id, created_at, updated_at, name, my_role, password_hash FROM users
 `
 
 func (q *Queries) GetUsers(ctx context.Context) ([]User, error) {
@@ -88,6 +97,7 @@ func (q *Queries) GetUsers(ctx context.Context) ([]User, error) {
 			&i.UpdatedAt,
 			&i.Name,
 			&i.MyRole,
+			&i.PasswordHash,
 		); err != nil {
 			return nil, err
 		}
