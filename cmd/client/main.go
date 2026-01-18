@@ -6,6 +6,7 @@ import (
 	"os"
 
 	_ "github.com/lib/pq"
+	"github.com/nickemp1996/famchat/internal/database"
 )
 
 func main() {
@@ -15,4 +16,7 @@ func main() {
 	if err != nil {
 		log.Fatal("Error connecting to database:", err)
 	}
+
+	dbQueries := database.New(db)
+
 }
